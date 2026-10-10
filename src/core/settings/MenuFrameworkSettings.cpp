@@ -1918,7 +1918,7 @@ namespace FEC
 			const char* trailingLabelKey = nullptr,
 			ConnectorBracket* connector = nullptr,
 			SegmentedStyle segStyle = kSegmentedDefaultStyle,
-			std::string_view defaultValueText = {})
+			std::string_view defaultValueText = std::string_view{})  // `= {}` here makes MSVC 14.4x misparse the template
 		{
 			static_assert(N >= 2, "SegmentedRow requires at least 2 options");
 
@@ -3617,7 +3617,7 @@ namespace FEC
 					default: break;
 				}
 				if (auto* avl = RE::ActorValueList::GetSingleton()) {
-					if (auto* info = avl->GetActorValue(a_av)) {
+					if (auto* info = RE::ActorValueList::GetActorValueInfo(a_av)) {
 						if (const char* fn = info->GetFullName(); fn && fn[0] != '\0') {
 							return std::string(fn);
 						}
@@ -3831,7 +3831,7 @@ namespace FEC
 					e.name        = a_spell->GetFullName();
 					if (!e.name || e.name[0] == '\0') e.name = "<unnamed>";
 					e.school      = a_spell->GetAssociatedSkill();
-					if (auto* c = a_spell->GetCostliestEffectItem(RE::MagicSystem::Delivery::kTotal, false))
+					if (auto* c = a_spell->GetCostliestEffectItem(RE::MagicSystem::Delivery::kNone, false))
 						if (c->baseEffect) e.tier = c->baseEffect->GetMinimumSkillLevel();
 					e.casting = false;
 					if (actor) {
@@ -3915,7 +3915,7 @@ namespace FEC
 					e.name        = spell->GetFullName();
 					if (!e.name || e.name[0] == '\0') e.name = "<unnamed>";
 					e.school      = spell->GetAssociatedSkill();
-					if (auto* c = spell->GetCostliestEffectItem(RE::MagicSystem::Delivery::kTotal, false))
+					if (auto* c = spell->GetCostliestEffectItem(RE::MagicSystem::Delivery::kNone, false))
 						if (c->baseEffect) e.tier = c->baseEffect->GetMinimumSkillLevel();
 					e.casting     = false;
 					e.suppressed  = true;

@@ -31,6 +31,7 @@ target_compile_definitions(
   PRIVATE
   UNICODE
   _UNICODE
+  NOMINMAX
 )
 
 target_link_libraries(

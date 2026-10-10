@@ -85,7 +85,7 @@ namespace FEC
 				// Avoid relocation ID 418622 on pre-1.6.629 AE; it is missing there.
 				if (REL::Module::IsAE()) {
 					const auto ver = REL::Module::get().version();
-					if (ver.patch() < 629) {
+					if (ver.minor() == 6 && ver.patch() < 629) {
 						addr = ScanForUpdateNPCOutfit();
 						if (!addr) {
 							logger::warn(

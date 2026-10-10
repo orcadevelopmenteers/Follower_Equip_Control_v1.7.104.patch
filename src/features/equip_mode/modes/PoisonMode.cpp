@@ -73,13 +73,13 @@ namespace FEC::EquipMode::Modes
 
 					auto* ep = static_cast<RE::BGSEntryPointPerkEntry*>(a_perkEntry);
 					auto* funcData = ep->functionData;
-					if (!funcData || funcData->GetType() != RE::BGSEntryPointFunctionData::FunctionType::kOneValue) {
+					if (!funcData || funcData->GetType() != RE::BGSEntryPointFunctionData::ENTRY_POINT_FUNCTION_DATA::kOneValue) {
 						return RE::BSContainer::ForEachResult::kContinue;
 					}
 
 					float value = static_cast<RE::BGSEntryPointFunctionDataOneValue*>(funcData)->data;
 
-					using Fn = RE::BGSEntryPointPerkEntry::EntryData::Function;
+					using Fn = RE::BGSEntryPointPerkEntry::Function;
 					switch (ep->entryData.function.get()) {
 					case Fn::kSetValue:
 						result = value;

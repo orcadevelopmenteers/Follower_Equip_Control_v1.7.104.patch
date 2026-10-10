@@ -45,7 +45,7 @@ namespace
   }
 }
 
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+extern "C" DLLEXPORT bool SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
   FEC::Logging::Initialize(spdlog::level::info);
 
@@ -80,12 +80,12 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() noexcept {
   SKSE::PluginVersionData v;
   v.PluginName(Plugin::NAME.data());
   v.PluginVersion(Plugin::VERSION);
-  v.UsesAddressLibrary(true);
-  v.HasNoStructUse();
+  v.UsesAddressLibrary();
+  v.UsesNoStructs();
   return v;
 }();
 
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface*, SKSE::PluginInfo* a_info)
+extern "C" DLLEXPORT bool SKSEPlugin_Query(const SKSE::QueryInterface*, SKSE::PluginInfo* a_info)
 {
   a_info->name = SKSEPlugin_Version.pluginName;
   a_info->infoVersion = SKSE::PluginInfo::kVersion;

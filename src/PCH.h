@@ -9,6 +9,9 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/msvc_sink.h>
 
+// msvc_sink.h pulls in <windows.h>; wingdi.h maps GetObject to GetObjectW and breaks CommonLib calls.
+#undef GetObject
+
 #include <format>
 #include <string_view>
 #include <vector>

@@ -50,7 +50,7 @@ namespace FEC::HeadgearAutoEquip
 			if (!a_armor) {
 				return false;
 			}
-			const auto mask = static_cast<std::uint32_t>(a_armor->GetSlotMask());
+			const auto mask = a_armor->GetSlotMask().underlying();
 			constexpr auto kHead = static_cast<std::uint32_t>(RE::BGSBipedObjectForm::BipedObjectSlot::kHead);
 			constexpr auto kHair = static_cast<std::uint32_t>(RE::BGSBipedObjectForm::BipedObjectSlot::kHair);
 			constexpr auto kCirclet = static_cast<std::uint32_t>(RE::BGSBipedObjectForm::BipedObjectSlot::kCirclet);

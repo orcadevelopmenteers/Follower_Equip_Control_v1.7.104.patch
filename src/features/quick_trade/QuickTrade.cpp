@@ -38,6 +38,12 @@ namespace FEC::QuickTrade
 		using ProcessButton_t = void(RE::ActivateHandler*, RE::ButtonEvent*, RE::PlayerControlsData*);
 		ProcessButton_t* g_originalProcessButton{ nullptr };
 
+		// ActivateHandler::ProcessButton is vtable slot 4; AE 1.7.99 inserted two vfuncs ahead of it.
+		[[nodiscard]] std::size_t ProcessButtonVfuncIndex() noexcept
+		{
+			return REL::VersionShift(0x04, RE::PlayerInputHandler::kAE1799AddedVFuncCount, SKSE::RUNTIME_SSE_1_7_99);
+		}
+
 		// Cached on the game thread; HookedProcessButton only reads these values.
 		// Keyboard uses DI scan code; gamepad uses SKSE keycode 266-281. 0 = unbound.
 		std::uint32_t g_sprintDik{ 0 };
@@ -180,7 +186,7 @@ namespace FEC::QuickTrade
 							RE::UI_MESSAGE_TYPE::kShow, nullptr);
 					}
 
-					actor->OpenContainer(3);  // 3 = kNPCMode
+					RE::ContainerMenu::OpenMenu(actor.get(), RE::ContainerMenu::ContainerMode::kNPCMode);
 					logger::info("QuickTrade: opened for {:08X} ({})",
 						actor->GetFormID(), actor->GetName());
 				});
@@ -370,14 +376,15 @@ namespace FEC::QuickTrade
 			return;
 		}
 
-		// vtable index 4 is ActivateHandler::ProcessButton; preserve any existing hook chain.
+		// Preserve any existing hook chain.
 		auto* vtable = *reinterpret_cast<std::uintptr_t**>(activateHandler);
-		g_originalProcessButton = reinterpret_cast<ProcessButton_t*>(vtable[4]);
+		const auto idx = ProcessButtonVfuncIndex();
+		g_originalProcessButton = reinterpret_cast<ProcessButton_t*>(vtable[idx]);
 
 		DWORD oldProtect;
-		if (VirtualProtect(&vtable[4], sizeof(void*), PAGE_READWRITE, &oldProtect)) {
-			vtable[4] = reinterpret_cast<std::uintptr_t>(&HookedProcessButton);
-			VirtualProtect(&vtable[4], sizeof(void*), oldProtect, &oldProtect);
+		if (VirtualProtect(&vtable[idx], sizeof(void*), PAGE_READWRITE, &oldProtect)) {
+			vtable[idx] = reinterpret_cast<std::uintptr_t>(&HookedProcessButton);
+			VirtualProtect(&vtable[idx], sizeof(void*), oldProtect, &oldProtect);
 		} else {
 			logger::error("QuickTrade: failed to patch vtable");
 			return;
@@ -412,17 +419,18 @@ namespace FEC::QuickTrade
 		}
 
 		auto* vtable = *reinterpret_cast<std::uintptr_t**>(activateHandler);
+		const auto idx = ProcessButtonVfuncIndex();
 		const auto thunkAddr = reinterpret_cast<std::uintptr_t>(&HookedProcessButton);
-		if (vtable[4] != thunkAddr) {
+		if (vtable[idx] != thunkAddr) {
 			logger::warn("QuickTrade: uninstall skipped (ActivateHandler slot modified by another plugin)");
 			ClearPseudoSession();
 			return;
 		}
 
 		DWORD oldProtect;
-		if (VirtualProtect(&vtable[4], sizeof(void*), PAGE_READWRITE, &oldProtect)) {
-			vtable[4] = reinterpret_cast<std::uintptr_t>(g_originalProcessButton);
-			VirtualProtect(&vtable[4], sizeof(void*), oldProtect, &oldProtect);
+		if (VirtualProtect(&vtable[idx], sizeof(void*), PAGE_READWRITE, &oldProtect)) {
+			vtable[idx] = reinterpret_cast<std::uintptr_t>(g_originalProcessButton);
+			VirtualProtect(&vtable[idx], sizeof(void*), oldProtect, &oldProtect);
 		}
 
 		g_originalProcessButton = nullptr;
